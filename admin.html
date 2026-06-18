@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>沪球后台 · 数据分析</title>
+<style>
+:root{
+  --green:#1A7A4A;--green2:#52B788;--surface:#F2F5F2;
+  --card:#fff;--text:#111827;--muted:#6B7280;--border:#E5E7EB;
+  --danger:#DC2626;--warn:#D97706;--info:#2563EB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--surface);color:var(--text)}
+/* 登录页 */
+#loginPage{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:linear-gradient(135deg,#1A7A4A,#52B788);
+}
+.login-box{background:#fff;border-radius:16px;padding:40px 32px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-logo{font-size:28px;font-weight:700;color:var(--green);text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-inp{
+  width:100%;padding:12px 14px;border:1px solid var(--border);
+  border-radius:9px;font-size:15px;margin-bottom:14px;outline:none;
+}
+.login-inp:focus{border-color:var(--green)}
+.login-btn{
+  width:100%;padding:13px;background:var(--green);color:#fff;
+  border:none;border-radius:9px;font-size:15px;font-weight:500;cursor:pointer;
+}
+.login-btn:active{background:#155e38}
+.login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+/* 主界面 */
+#adminPage{display:none}
+header{
+  background:var(--green);color:#fff;
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.h-logo{font-size:16px;font-weight:700}
+.h-actions{display:flex;gap:8px}
+.h-btn{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  border-radius:8px;padding:7px 12px;color:#fff;font-size:12px;cursor:pointer;
+}
+.h-btn:active{background:rgba(255,255,255,.35)}
+.main{padding:16px;max-width:1200px;margin:0 auto}
+/* 统计卡片 */
+.stat-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);margin-bottom:16px}
+@media(min-width:600px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+.scard{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px}
+.scard-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.scard-val{font-size:26px;font-weight:700;color:var(--text)}
+.scard-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.scard.green .scard-val{color:var(--green)}
+.scard.blue .scard-val{color:var(--info)}
+.scard.warn .scard-val{color:var(--warn)}
+.scard.red .scard-val{color:var(--danger)}
+/* 内容区 */
+.section{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
+.sec-head{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.sec-body{padding:16px}
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;background:var(--surface);color:var(--muted);font-size:11px;font-weight:500}
+td{padding:8px 12px;border-top:1px solid var(--border)}
+tr:hover td{background:#FAFAF7}
+.bar-wrap{width:80px;background:var(--surface);border-radius:3px;height:6px;display:inline-block;vertical-align:middle;margin-left:6px}
+.bar-fill{height:6px;background:var(--green);border-radius:3px}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-green{background:#F0FDF4;color:#15803D}
+.badge-blue{background:#EFF6FF;color:#1D4ED8}
+.badge-warn{background:#FFF7ED;color:#B45309}
+/* 时间轴 */
+.event-list{max-height:320px;overflow-y:auto}
+.ev{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:12px;align-items:flex-start}
+.ev:first-child{border-top:none}
+.ev-time{color:var(--muted);white-space:nowrap;flex-shrink:0;font-size:11px;padding-top:1px}
+.ev-type{padding:2px 8px;border-radius:8px;font-size:11px;font-weight:500;flex-shrink:0;white-space:nowrap}
+.et-booking_open{background:#F0FDF4;color:#15803D}
+.et-booking_action{background:#D1FAE5;color:#065F46}
+.et-filter{background:#EFF6FF;color:#1D4ED8}
+.et-search{background:#FFF7ED;color:#B45309}
+.et-fav_add{background:#FFF1F2;color:#BE123C}
+.et-fav_remove{background:#F4F4F5;color:#52525B}
+.et-tag_add{background:#EEF2FF;color:#4338CA}
+.et-tag_remove{background:#F4F4F5;color:#52525B}
+.et-share_tap{background:#FDF4FF;color:#7E22CE}
+.et-feedback{background:#FFFBEB;color:#92400E}
+.et-session_start{background:#F4F4F5;color:#52525B}
+.ev-body{flex:1;color:var(--text)}
+/* 搜索词 */
+.kw-pill{
+  display:inline-block;padding:3px 10px;border-radius:12px;
+  margin:3px;font-size:12px;background:var(--surface);
+  border:1px solid var(--border);color:var(--text);
+}
+/* 工具栏 */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tb-btn{
+  padding:7px 14px;border:1px solid var(--border);border-radius:8px;
+  background:#fff;font-size:13px;cursor:pointer;white-space:nowrap;
+}
+.tb-btn:active{background:var(--surface)}
+.tb-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.tb-select{padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px}
+.no-data{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+/* 热力图简版 */
+.heatrow{display:flex;gap:3px;margin-bottom:4px;align-items:center;font-size:11px}
+.heatrow-label{width:64px;color:var(--muted);text-align:right;padding-right:6px;flex-shrink:0}
+.heatcell{
+  width:20px;height:14px;border-radius:2px;
+  background:var(--surface);transition:background .15s;
+}
+.heatcell[data-v="1"]{background:#BBF7D0}
+.heatcell[data-v="2"]{background:#52B788}
+.heatcell[data-v="3"]{background:#1A7A4A}
+.toast{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);
+  background:rgba(0,0,0,.75);color:#fff;padding:10px 18px;
+  border-radius:8px;font-size:13px;opacity:0;transition:all .2s;
+  pointer-events:none;z-index:999;
+}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">🎾 沪球后台</div>
+    <div class="login-sub">数据分析 & 运营工作台</div>
+    <input class="login-inp" id="pwdInput" type="password" placeholder="访问密码" maxlength="20"
+      onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">进入后台</button>
+    <div class="login-hint">注：数据存储在本机浏览器 localStorage</div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="adminPage">
+  <header>
+    <div class="h-logo">🎾 沪球 · 运营后台</div>
+    <div class="h-actions">
+      <button class="h-btn" onclick="refresh()">🔄 刷新</button>
+      <button class="h-btn" onclick="exportCSV()">📥 导出CSV</button>
+      <button class="h-btn" onclick="clearData()">🗑 清空数据</button>
+      <button class="h-btn" onclick="logout()">退出</button>
+    </div>
+  </header>
+  <div class="main">
+    <!-- 概览统计 -->
+    <div class="stat-grid" id="statGrid"></div>
+    <!-- 时间筛选 -->
+    <div class="toolbar">
+      <select class="tb-select" id="rangeSelect" onchange="refresh()">
+        <option value="1">今天</option>
+        <option value="7" selected>最近7天</option>
+        <option value="30">最近30天</option>
+        <option value="0">全部</option>
+      </select>
+      <button class="tb-btn primary" onclick="openDemoPage()">🔗 打开 demo.html</button>
+    </div>
+    <!-- 场馆热度 -->
+    <div class="section">
+      <div class="sec-head">🏟 场馆热度（预约意向次数）<span id="venueCount" style="font-size:12px;color:var(--muted)"></span></div>
+      <div class="sec-body"><div id="venueTable"></div></div>
+    </div>
+    <!-- 用户行为漏斗 -->
+    <div class="section">
+      <div class="sec-head">📊 用户行为漏斗</div>
+      <div class="sec-body"><div id="funnelTable"></div></div>
+    </div>
+    <!-- 平台需求 -->
+    <div class="section">
+      <div class="sec-head">📱 平台需求（哪个预约平台最受关注）</div>
+      <div class="sec-body"><div id="platformTable"></div></div>
+    </div>
+    <!-- 筛选偏好 -->
+    <div class="section">
+      <div class="sec-head">🎛 筛选维度偏好</div>
+      <div class="sec-body"><div id="filterTable"></div></div>
+    </div>
+    <!-- 搜索词 -->
+    <div class="section">
+      <div class="sec-head">🔍 搜索关键词</div>
+      <div class="sec-body"><div id="searchCloud"></div></div>
+    </div>
+    <!-- 用户标签洞察 -->
+    <div class="section">
+      <div class="sec-head">🏷 用户标签洞察（哪些标签最常被打）</div>
+      <div class="sec-body"><div id="tagTable"></div></div>
+    </div>
+    <!-- 收藏排行 -->
+    <div class="section">
+      <div class="sec-head">❤️ 收藏排行</div>
+      <div class="sec-body"><div id="favTable"></div></div>
+    </div>
+    <!-- 用户反馈 -->
+    <div class="section">
+      <div class="sec-head">💬 用户反馈（补充场馆）</div>
+      <div class="sec-body"><div id="feedbackList"></div></div>
+    </div>
+    <!-- 实时事件流 -->
+    <div class="section">
+      <div class="sec-head">⚡ 最近事件流 <span style="font-size:12px;color:var(--muted)">(最新100条)</span></div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════
+//  密码（明文本地校验，demo用）
+// ═══════════════════
+const ADMIN_PWD='beibei';  // ← 可在此修改
+
+function login(){
+  const v=document.getElementById('pwdInput').value;
+  if(v===ADMIN_PWD){
+    sessionStorage.setItem('admin_auth','1');
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('adminPage').style.display='block';
+    refresh();
+  } else {
+    showToast('密码错误');
+    document.getElementById('pwdInput').value='';
+  }
+}
+function logout(){
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+
+// 自动检测是否已登录
+if(sessionStorage.getItem('admin_auth')==='1'){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('adminPage').style.display='block';
+}
+
+// ═══════════════════
+//  数据读取
+// ═══════════════════
+function getEvents(){
+  return JSON.parse(localStorage.getItem('huqiu_events')||'[]');
+}
+function getUserData(){
+  return JSON.parse(localStorage.getItem('huqiu_user')||'{"favs":[],"tags":{}}');
+}
+function getVenueNames(){
+  // 在 admin 页无法直接访问 demo.html 的 V 数组，用本地缓存
+  const cached=localStorage.getItem('huqiu_venue_names');
+  if(cached)return JSON.parse(cached);
+  return {};
+}
+
+function filterByRange(events){
+  const days=parseInt(document.getElementById('rangeSelect').value||7);
+  if(!days)return events;
+  const cutoff=Date.now()-days*86400000;
+  return events.filter(e=>e.ts>=cutoff);
+}
+
+// ═══════════════════
+//  刷新 & 渲染
+// ═══════════════════
+function refresh(){
+  const all=getEvents();
+  const events=filterByRange(all);
+  renderStats(all,events);
+  renderVenues(events);
+  renderFunnel(events);
+  renderPlatforms(events);
+  renderFilters(events);
+  renderSearch(events);
+  renderTags(events);
+  renderFavs(events);
+  renderFeedback(events);
+  renderEventStream(all);
+}
+
+function renderStats(all,events){
+  const sessions=new Set(events.map(e=>e.sid)).size;
+  const bookings=events.filter(e=>e.type==='booking_open').length;
+  const actions=events.filter(e=>e.type==='booking_action').length;
+  const rate=bookings>0?Math.round(actions/bookings*100):0;
+  const favAdds=events.filter(e=>e.type==='fav_add').length;
+  document.getElementById('statGrid').innerHTML=[
+    {label:'总会话数',val:sessions,sub:`全量 ${new Set(all.map(e=>e.sid)).size} 个`,cls:'green'},
+    {label:'预约弹窗打开',val:bookings,sub:'有预约意向的场馆查看',cls:'blue'},
+    {label:'实际操作率',val:rate+'%',sub:`${actions}次跳转/复制/导航`,cls:'warn'},
+    {label:'收藏次数',val:favAdds,sub:'累计新增',cls:'red'},
+  ].map(s=>`
+    <div class="scard ${s.cls}">
+      <div class="scard-label">${s.label}</div>
+      <div class="scard-val">${s.val}</div>
+      <div class="scard-sub">${s.sub}</div>
+    </div>`).join('');
+}
+
+function count(arr,key){
+  const m={};
+  arr.forEach(e=>{const v=e[key]||'unknown';m[v]=(m[v]||0)+1;});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+
+function renderVenues(events){
+  const vnames=getVenueNames();
+  const opens=events.filter(e=>e.type==='booking_open');
+  const byId=count(opens,'venueId');
+  const max=byId[0]?.[1]||1;
+  document.getElementById('venueCount').textContent=`共 ${byId.length} 个场馆有数据`;
+  document.getElementById('venueTable').innerHTML=byId.length?`
+    <table>
+      <tr><th>#</th><th>场馆</th><th>预约意向</th><th>操作次数</th><th>热度</th></tr>
+      ${byId.slice(0,20).map(([id,n],i)=>{
+        const actions=events.filter(e=>e.type==='booking_action'&&String(e.venueId)===String(id)).length;
+        const name=opens.find(e=>String(e.venueId)===String(id))?.venueName||('ID:'+id);
+        const pct=Math.round(n/max*100);
+        return`<tr>
+          <td>${i+1}</td>
+          <td>${name}</td>
+          <td><strong>${n}</strong></td>
+          <td>${actions}</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div></td>
+        </tr>`;
+      }).join('')}
+    </table>`:'<div class="no-data">暂无数据 — 请先在 demo.html 中查看场馆</div>';
+}
+
+function renderFunnel(events){
+  const steps=[
+    {type:'session_start',label:'访问页面'},
+    {type:'filter',label:'使用筛选'},
+    {type:'search',label:'搜索关键词'},
+    {type:'booking_open',label:'打开预约弹窗'},
+    {type:'booking_action',label:'执行预约操作'},
+    {type:'fav_add',label:'收藏场馆'},
+  ];
+  const counts=steps.map(s=>({...s,n:events.filter(e=>e.type===s.type).length}));
+  const base=counts[0].n||1;
+  document.getElementById('funnelTable').innerHTML=`
+    <table>
+      <tr><th>步骤</th><th>次数</th><th>转化率</th><th></th></tr>
+      ${counts.map((s,i)=>{
+        const prev=i>0?counts[i-1].n||1:base;
+        const rate=i===0?'100%':Math.round(s.n/Math.max(prev,1)*100)+'%';
+        const abs=Math.round(s.n/base*100);
+        return`<tr>
+          <td>${i+1}. ${s.label}</td>
+          <td><strong>${s.n}</strong></td>
+          <td>${rate}</td>
+          <td><div class="bar-wrap" style="width:100px"><div class="bar-fill" style="width:${Math.min(abs,100)}%"></div></div></td>
+        </tr>`;
+      }).join('')}
+    </table>`;
+}
+
+function renderPlatforms(events){
+  const opens=events.filter(e=>e.type==='booking_open');
+  // 需要从 venue 的 plt 字段分组，保存在 event 里没有…借用 venueName 作 fallback
+  // 实际 booking_open 事件里有 platform 字段
+  const by=count(opens,'platform');
+  const max=by[0]?.[1]||1;
+  const PLT_NAME={
+    jushi:'久事体育',yundong:'韵动吧',quyundong:'趣运动',
+    gogo:'勾勾运动',jiubo:'久博',tennis:'网球有约',
+    duoduo:'多多动',yonex:'帮帮体育',self:'自营',wechat:'微信群',unknown:'未知'
+  };
+  document.getElementById('platformTable').innerHTML=by.length?`
+    <table>
+      <tr><th>平台</th><th>预约意向次数</th><th>占比</th></tr>
+      ${by.map(([plt,n])=>`<tr>
+        <td>${PLT_NAME[plt]||plt}</td>
+        <td><strong>${n}</strong></td>
+        <td><div class="bar-wrap" style="width:120px"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div></td>
+      </tr>`).join('')}
+    </table>`:'<div class="no-data">暂无数据</div>';
+}
+
+function renderFilters(events){
+  const fe=events.filter(e=>e.type==='filter');
+  const by=count(fe,'key');
+  const valMap={};
+  fe.forEach(e=>{
+    const k=(e.key||'?')+'|'+(e.val||'空');
+    valMap[k]=(valMap[k]||0)+1;
+  });
+  const topVals=Object.entries(valMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const KEY_NAME={sport:'运动类型',district:'区域',env:'室内外',price:'价格区间',diff:'难度',plt:'平台',fav:'收藏筛选'};
+  const max=by[0]?.[1]||1;
+  document.getElementById('filterTable').innerHTML=by.length?`
+    <table>
+      <tr><th>筛选维度</th><th>使用次数</th><th>最多选择</th></tr>
+      ${by.map(([k,n])=>{
+        const top=topVals.filter(([kv])=>kv.startsWith(k+'|')).slice(0,1);
+        const topVal=top[0]?top[0][0].split('|')[1]:'—';
+        return`<tr>
+          <td>${KEY_NAME[k]||k}</td>
+          <td><strong>${n}</strong></td>
+          <td><span class="badge badge-blue">${topVal}</span></td>
+        </tr>`;
+      }).join('')}
+    </table>`:'<div class="no-data">暂无数据</div>';
+}
+
+function renderSearch(events){
+  const queries=events.filter(e=>e.type==='search').map(e=>e.query||'').filter(Boolean);
+  if(!queries.length){document.getElementById('searchCloud').innerHTML='<div class="no-data">暂无搜索记录</div>';return;}
+  const freq={};
+  queries.forEach(q=>freq[q]=(freq[q]||0)+1);
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('searchCloud').innerHTML=sorted.map(([q,n])=>
+    `<span class="kw-pill">${q}${n>1?` ×${n}`:''}</span>`).join('');
+}
+
+function renderTags(events){
+  const adds=events.filter(e=>e.type==='tag_add');
+  const by=count(adds,'tag');
+  const max=by[0]?.[1]||1;
+  document.getElementById('tagTable').innerHTML=by.length?`
+    <table>
+      <tr><th>标签</th><th>被添加次数</th><th>来源</th></tr>
+      ${by.slice(0,15).map(([tag,n])=>{
+        const custom=adds.some(e=>e.tag===tag&&e.custom);
+        return`<tr>
+          <td>${tag}</td>
+          <td><strong>${n}</strong>
+            <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div>
+          </td>
+          <td><span class="badge ${custom?'badge-warn':'badge-green'}">${custom?'用户自定义':'预设'}</span></td>
+        </tr>`;
+      }).join('')}
+    </table>`:'<div class="no-data">暂无标签数据</div>';
+}
+
+function renderFavs(events){
+  const adds=events.filter(e=>e.type==='fav_add');
+  const by=count(adds,'venueId');
+  const max=by[0]?.[1]||1;
+  document.getElementById('favTable').innerHTML=adds.length?`
+    <table>
+      <tr><th>#</th><th>场馆</th><th>被收藏次数</th></tr>
+      ${by.slice(0,10).map(([id,n],i)=>{
+        const name=adds.find(e=>String(e.venueId)===String(id))?.venueName||('ID:'+id);
+        return`<tr>
+          <td>${i+1}</td>
+          <td>${name}</td>
+          <td><strong>${n}</strong>
+            <div class="bar-wrap"><div class="bar-fill" style="background:#FF385C;width:${Math.round(n/max*100)}%"></div></div>
+          </td>
+        </tr>`;
+      }).join('')}
+    </table>`:'<div class="no-data">暂无收藏数据</div>';
+}
+
+function renderFeedback(events){
+  const fb=events.filter(e=>e.type==='feedback').reverse();
+  document.getElementById('feedbackList').innerHTML=fb.length?`
+    <table>
+      <tr><th>时间</th><th>内容</th></tr>
+      ${fb.map(e=>`<tr>
+        <td style="color:var(--muted);font-size:11px;white-space:nowrap">${fmtTime(e.ts)}</td>
+        <td>${e.content||''}</td>
+      </tr>`).join('')}
+    </table>`:'<div class="no-data">暂无用户反馈</div>';
+}
+
+const TYPE_LABEL={
+  session_start:'访问',booking_open:'打开预约',booking_action:'执行操作',
+  filter:'筛选',search:'搜索',fav_add:'收藏',fav_remove:'取消收藏',
+  tag_add:'打标签',tag_remove:'删标签',share_tap:'分享',feedback:'反馈',
+};
+function renderEventStream(events){
+  const recent=[...events].reverse().slice(0,100);
+  document.getElementById('eventList').innerHTML=recent.length
+    ?recent.map(e=>{
+      let body='';
+      if(e.venueName)body+=`${e.venueName}`;
+      if(e.action)body+=` [${e.action}]`;
+      if(e.query)body+=` "${e.query}"`;
+      if(e.tag)body+=` #${e.tag}`;
+      if(e.content)body+=` ${e.content}`;
+      if(e.key)body+=` ${e.key}=${e.val}`;
+      return`<div class="ev" style="padding:6px 16px">
+        <span class="ev-time">${fmtTime(e.ts)}</span>
+        <span class="ev-type et-${e.type}">${TYPE_LABEL[e.type]||e.type}</span>
+        <span class="ev-body">${body||''}<small style="color:var(--muted);margin-left:8px">${e.ua||''}</small></span>
+      </div>`;
+    }).join('')
+    :'<div class="no-data">暂无事件记录</div>';
+}
+
+// ═══════════════════
+//  工具函数
+// ═══════════════════
+function fmtTime(ts){
+  const d=new Date(ts);
+  const now=new Date();
+  const diff=Date.now()-ts;
+  if(diff<60000)return Math.round(diff/1000)+'秒前';
+  if(diff<3600000)return Math.round(diff/60000)+'分钟前';
+  if(d.toDateString()===now.toDateString())return d.toTimeString().slice(0,5);
+  return (d.getMonth()+1)+'/'+(d.getDate())+' '+d.toTimeString().slice(0,5);
+}
+
+function exportCSV(){
+  const events=getEvents();
+  if(!events.length){showToast('暂无数据可导出');return;}
+  const header='id,type,ts,datetime,sid,ua,venueId,venueName,platform,action,key,val,tag,query,content';
+  const rows=events.map(e=>[
+    e.id||'',e.type||'',e.ts||'',e.ts?new Date(e.ts).toLocaleString('zh-CN'):'',
+    e.sid||'',e.ua||'',e.venueId||'',
+    (e.venueName||'').replace(/,/g,'，'),
+    e.platform||'',e.action||'',e.key||'',e.val||'',
+    (e.tag||'').replace(/,/g,'，'),
+    (e.query||'').replace(/,/g,'，'),
+    (e.content||'').replace(/,/g,'，').replace(/\n/g,' '),
+  ].join(','));
+  const csv='﻿'+[header,...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`huqiu_data_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`已导出 ${events.length} 条事件`);
+}
+
+function clearData(){
+  if(!confirm('确认清空所有埋点数据？此操作不可恢复。'))return;
+  localStorage.removeItem('huqiu_events');
+  showToast('数据已清空');
+  refresh();
+}
+
+function openDemoPage(){
+  window.open('demo.html','_blank');
+}
+
+let toastTimer;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// 入口判断（已登录直接渲染）
+if(sessionStorage.getItem('admin_auth')==='1'){refresh();}
+
+document.getElementById('pwdInput')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter')login();
+});
+</script>
+</body>
+</html>

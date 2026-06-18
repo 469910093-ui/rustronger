@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>沪球 · 上海网球/匹克球/板式网球</title>
+<style>
+:root{
+  --green:#1A7A4A;--green2:#52B788;--surface:#F2F5F2;
+  --card:#fff;--text:#111827;--muted:#6B7280;--border:#E5E7EB;
+  --r:12px;--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+  background:var(--surface);color:var(--text);min-height:100vh;
+  padding-bottom:calc(60px + var(--safe-bottom))}
+header{
+  background:var(--green);color:#fff;
+  padding:12px 16px 10px;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+.hd-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.logo{font-size:17px;font-weight:700;white-space:nowrap;letter-spacing:-.3px}
+.search-wrap{flex:1;min-width:0}
+.search-bar{
+  width:100%;background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.25);border-radius:8px;
+  padding:8px 12px;color:#fff;font-size:14px;outline:none;
+}
+.search-bar::placeholder{color:rgba(255,255,255,.5)}
+.search-bar:focus{background:rgba(255,255,255,.28)}
+.hd-actions{display:flex;gap:8px;flex-shrink:0}
+.hd-btn{
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;
+  cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;
+}
+.hd-btn:active{background:rgba(255,255,255,.3)}
+.hd-stats{font-size:11px;color:rgba(255,255,255,.65)}
+.filter-wrap{
+  background:#fff;border-bottom:1px solid var(--border);
+  position:sticky;top:calc(var(--header-h,80px));z-index:190;
+}
+.filter-scroll{
+  display:flex;overflow-x:auto;padding:8px 14px;gap:0;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.filter-scroll::-webkit-scrollbar{display:none}
+.fgrp{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.fsep{width:1px;height:16px;background:var(--border);margin:0 7px;flex-shrink:0}
+.chip{
+  padding:5px 12px;border-radius:20px;border:1px solid var(--border);
+  background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;
+  color:var(--text);transition:all .1s;user-select:none;
+  -webkit-user-select:none;min-height:30px;
+}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+.chip.fav-on{background:#FF385C;color:#fff;border-color:#FF385C}
+.main{padding:12px 14px;max-width:1080px;margin:0 auto}
+.result-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.result-count{font-size:13px;color:var(--muted)}
+.sort-sel{
+  font-size:12px;border:1px solid var(--border);border-radius:7px;
+  padding:5px 8px;background:#fff;color:var(--text);cursor:pointer;
+}
+.gap-box{
+  background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;
+  padding:11px 14px;margin-bottom:12px;font-size:12px;color:#92400E;line-height:1.65;
+}
+.gap-box strong{color:#78350F;display:block;margin-bottom:4px}
+.gap-toggle{
+  background:none;border:none;color:var(--green);font-size:12px;
+  cursor:pointer;padding:0;margin-top:4px;text-decoration:underline;
+}
+.vgrid{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:580px){.vgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.vgrid{grid-template-columns:1fr 1fr 1fr}}
+.vcard{
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);overflow:hidden;
+  transition:box-shadow .15s,transform .1s;
+}
+.vcard:active{transform:scale(.99)}
+@media(hover:hover){.vcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.09);transform:translateY(-1px)}}
+.cb{padding:13px 14px 11px}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:8px}
+.ctop-left{min-width:0;flex:1}
+.ctop-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.vname{font-size:15px;font-weight:600;line-height:1.3}
+.vloc{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.p-jushi   {background:#EFF6FF;color:#1D4ED8}
+.p-yundong {background:#F0FDF4;color:#15803D}
+.p-quyundong{background:#F0F9FF;color:#0369A1}
+.p-gogo    {background:#FFF7ED;color:#B45309}
+.p-jiubo   {background:#FDF4FF;color:#7E22CE}
+.p-tennis  {background:#FEF9EE;color:#B45309}
+.p-duoduo  {background:#FFF1F2;color:#BE123C}
+.p-yonex   {background:#F0F4FF;color:#4338CA}
+.p-self    {background:#F4F4F5;color:#52525B}
+.p-wechat  {background:#F0FDF4;color:#166534}
+/* 收藏按钮 */
+.fav-btn{
+  background:none;border:none;font-size:18px;cursor:pointer;
+  padding:2px;line-height:1;color:#D1D5DB;
+}
+.fav-btn.active{color:#FF385C}
+.fav-btn:active{transform:scale(1.2)}
+.ctags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.tag{font-size:11px;background:var(--surface);color:var(--muted);padding:2px 8px;border-radius:4px}
+/* 用户标签 */
+.user-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;min-height:0}
+.utag{
+  font-size:11px;padding:2px 8px;border-radius:12px;
+  background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;
+  display:flex;align-items:center;gap:3px;
+}
+.utag-del{
+  background:none;border:none;cursor:pointer;
+  color:#818CF8;font-size:12px;padding:0;line-height:1;
+}
+.add-tag-btn{
+  font-size:11px;padding:2px 8px;border-radius:12px;
+  background:none;border:1px dashed var(--border);
+  color:var(--muted);cursor:pointer;
+}
+.add-tag-btn:active{background:var(--surface)}
+.cfac{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
+.fac{font-size:11px;padding:2px 8px;border-radius:4px}
+.fac.y{background:#F0FDF4;color:#15803D}
+.fac.n{background:#FEF2F2;color:#B91C1C;opacity:.5}
+.cfoot{display:flex;justify-content:space-between;align-items:flex-end}
+.cprice{font-size:17px;font-weight:700;color:var(--green)}
+.cprice span{font-size:11px;font-weight:400;color:var(--muted)}
+.diff-easy{color:#15803D;font-size:11px}
+.diff-mid {color:#B45309;font-size:11px}
+.diff-hard{color:#B91C1C;font-size:11px}
+.book-btn{
+  padding:9px 18px;background:var(--green);color:#fff;
+  border:none;border-radius:9px;font-size:13px;font-weight:500;
+  cursor:pointer;min-width:80px;min-height:40px;
+}
+.book-btn:active{background:#155e38}
+.cnote{
+  padding:8px 14px;background:#FAFAF7;
+  border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);line-height:1.55;
+}
+.qbadge{font-size:10px;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle}
+.qfull{background:#F0FDF4;color:#15803D}
+.qpart{background:#FFF7ED;color:#B45309}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-ico{font-size:48px;margin-bottom:10px}
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;padding:8px 0 calc(8px + var(--safe-bottom));
+  z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,.06);
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;
+  padding:2px 0;
+}
+.bnav-btn.active{color:var(--green)}
+.bnav-ico{font-size:20px}
+/* 弹窗 */
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:500;align-items:flex-end;justify-content:center;
+}
+.modal-bg.open{display:flex}
+.modal{
+  background:#fff;border-radius:20px 20px 0 0;
+  width:100%;max-width:600px;
+  padding:20px 20px calc(20px + var(--safe-bottom));
+  animation:slideUp .25s ease;max-height:85vh;overflow-y:auto;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.modal-venue{background:var(--surface);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.modal-venue-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.modal-venue-addr{font-size:12px;color:var(--muted)}
+.modal-actions{display:flex;flex-direction:column;gap:10px}
+.m-action{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:13px 14px;cursor:pointer;
+  text-align:left;width:100%;
+}
+.m-action:active{background:#E5EDE5}
+.m-action-ico{font-size:24px;flex-shrink:0}
+.m-action-label{font-size:14px;font-weight:500}
+.m-action-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.m-primary{background:var(--green);border-color:var(--green)}
+.m-primary .m-action-label,.m-primary .m-action-desc{color:#fff}
+.modal-close{
+  background:none;border:none;color:var(--muted);
+  font-size:14px;cursor:pointer;width:100%;text-align:center;padding:10px 0 0;
+}
+/* 标签弹窗 */
+.tag-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:flex-end;justify-content:center}
+.tag-modal.open{display:flex}
+.tag-panel{
+  background:#fff;border-radius:20px 20px 0 0;
+  width:100%;max-width:600px;
+  padding:20px 20px calc(20px + var(--safe-bottom));
+  animation:slideUp .25s ease;
+}
+.tag-panel-title{font-size:16px;font-weight:600;margin-bottom:12px}
+.tag-preset-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tp{
+  padding:6px 14px;border-radius:20px;border:1px solid var(--border);
+  background:#fff;font-size:13px;cursor:pointer;
+}
+.tp:active{transform:scale(.96)}
+.tp.on{background:#4338CA;color:#fff;border-color:#4338CA}
+.tag-input-row{display:flex;gap:8px;margin-bottom:16px}
+.tag-input{
+  flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:9px;
+  font-size:14px;outline:none;
+}
+.tag-input:focus{border-color:#4338CA}
+.tag-add-btn{
+  padding:9px 16px;background:#4338CA;color:#fff;
+  border:none;border-radius:9px;font-size:14px;cursor:pointer;white-space:nowrap;
+}
+.tag-done-btn{
+  width:100%;padding:12px;background:var(--green);color:#fff;
+  border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;
+}
+.toast{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);
+  background:rgba(0,0,0,.75);color:#fff;padding:10px 18px;
+  border-radius:8px;font-size:13px;opacity:0;transition:all .2s;
+  pointer-events:none;z-index:999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+</style>
+</head>
+<body>
+<header id="mainHeader">
+  <div class="hd-row1">
+    <div class="logo">🎾 沪球</div>
+    <div class="search-wrap">
+      <input class="search-bar" id="searchInput" type="search"
+        placeholder="搜球馆、地址、区域…"
+        oninput="onSearch(this.value)">
+    </div>
+    <div class="hd-actions">
+      <button class="hd-btn" onclick="shareApp()">📤</button>
+    </div>
+  </div>
+  <div class="hd-stats" id="statsBar">加载中…</div>
+</header>
+
+<div class="filter-wrap" id="filterWrap">
+  <div class="filter-scroll" id="filterRow"></div>
+</div>
+
+<div class="main">
+  <div id="gapDiv"></div>
+  <div class="result-bar">
+    <div class="result-count" id="resCount"></div>
+    <select class="sort-sel" id="sortSel" onchange="render()">
+      <option value="">默认</option>
+      <option value="pa">价格↑</option>
+      <option value="pd">价格↓</option>
+      <option value="di">最易订优先</option>
+    </select>
+  </div>
+  <div class="vgrid" id="vgrid"></div>
+</div>
+
+<nav class="bnav">
+  <button class="bnav-btn active" onclick="setNav('list',this)">
+    <span class="bnav-ico">🏟</span>场馆列表
+  </button>
+  <button class="bnav-btn" id="favNavBtn" onclick="toggleFavFilter(this)">
+    <span class="bnav-ico">❤️</span>我的收藏
+  </button>
+  <button class="bnav-btn" onclick="openFeedback()">
+    <span class="bnav-ico">＋</span>补充场馆
+  </button>
+</nav>
+
+<!-- 预约弹窗 -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mTitle">去预约</div>
+    <div class="modal-sub" id="mSub"></div>
+    <div class="modal-venue">
+      <div class="modal-venue-name" id="mName"></div>
+      <div class="modal-venue-addr" id="mAddr"></div>
+    </div>
+    <div class="modal-actions" id="mActions"></div>
+    <button class="modal-close" onclick="closeModal()">取消</button>
+  </div>
+</div>
+
+<!-- 标签弹窗 -->
+<div class="tag-modal" id="tagModal" onclick="closeTagModal(event)">
+  <div class="tag-panel" id="tagPanel">
+    <div class="modal-handle"></div>
+    <div class="tag-panel-title" id="tagPanelTitle">给场馆打标签</div>
+    <div class="tag-preset-wrap" id="tagPresets"></div>
+    <div class="tag-input-row">
+      <input class="tag-input" id="tagCustomInput" placeholder="自定义标签…" maxlength="10" onkeydown="if(event.key==='Enter')addCustomTag()">
+      <button class="tag-add-btn" onclick="addCustomTag()">添加</button>
+    </div>
+    <button class="tag-done-btn" onclick="closeTagModal()">完成</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════
+//  平台配置
+// ════════════════════════
+const PLT={
+  jushi:    {name:'久事体育',  cls:'p-jushi',    mp:'久事体育智慧场馆',    appId:'',path:'pages/index/index'},
+  yundong:  {name:'韵动吧',    cls:'p-yundong',  mp:'韵动吧',              appId:'',path:'pages/index/index'},
+  quyundong:{name:'趣运动',    cls:'p-quyundong',mp:'趣运动',              appId:'',path:''},
+  gogo:     {name:'勾勾运动',  cls:'p-gogo',     mp:'GoGoSports勾勾运动', appId:'',path:''},
+  jiubo:    {name:'久博',      cls:'p-jiubo',    mp:'久博网球',            appId:'',path:''},
+  tennis:   {name:'网球有约',  cls:'p-tennis',   mp:'网球有约',            appId:'',path:''},
+  duoduo:   {name:'多多动',    cls:'p-duoduo',   mp:'多多动OurPickleball', appId:'',path:''},
+  yonex:    {name:'帮帮体育',  cls:'p-yonex',    mp:'YONEX Tennis Lab',   appId:'',path:''},
+  self:     {name:'自营',      cls:'p-self',     mp:'',                    appId:'',path:''},
+  wechat:   {name:'微信群',    cls:'p-wechat',   mp:'',                    appId:'',path:''},
+};
+
+// ════════════════════════
+//  场馆数据
+// ════════════════════════
+const V=[
+  {id:1,name:'源深体育中心',district:'浦东',addr:'浦东新区源深路299号',sports:['tennis'],indoor:false,pMin:60,pMax:120,courts:8,fac:{l:1,s:1,p:1},plt:'jushi',days:3,diff:'hard',note:'赛事级红土硬地，周末3天前必抢',q:'full'},
+  {id:2,name:'东方体育中心',district:'浦东',addr:'浦东新区丁香路899号',sports:['tennis'],indoor:true,pMin:100,pMax:200,courts:6,fac:{l:1,s:1,p:1},plt:'jushi',days:2,diff:'mid',note:'室内恒温，设施一流',q:'full'},
+  {id:3,name:'仙霞网球中心',district:'长宁',addr:'长宁区仙霞路500号',sports:['tennis'],indoor:false,pMin:80,pMax:150,courts:12,fac:{l:1,s:1,p:0},plt:'jushi',days:2,diff:'mid',note:'12片全市最大公立场，无停车，地铁可达',q:'full'},
+  {id:4,name:'徐家汇体育公园',district:'徐汇',addr:'徐汇区天钥桥路500号',sports:['tennis','pickleball'],indoor:false,pMin:60,pMax:120,courts:6,fac:{l:1,s:1,p:1},plt:'jushi',days:2,diff:'mid',note:'2023新改建，含匹克球场，热门打卡',q:'full'},
+  {id:5,name:'旗忠网球中心',district:'闵行',addr:'闵行区旗忠路1号',sports:['tennis'],indoor:true,pMin:80,pMax:220,courts:20,fac:{l:1,s:1,p:1},plt:'jushi',days:1,diff:'easy',note:'WTA赛场，场地充足，久事+韵动双平台可订',q:'full'},
+  {id:6,name:'上海网球中心（龙华）',district:'徐汇',addr:'徐汇区龙华西路155号',sports:['tennis'],indoor:false,pMin:60,pMax:130,courts:16,fac:{l:1,s:1,p:1},plt:'yundong',days:1,diff:'mid',note:'16片，周末微抢手',q:'full'},
+  {id:7,name:'浦江郊野公园网球场',district:'闵行',addr:'闵行区浦星公路668号',sports:['tennis'],indoor:false,pMin:40,pMax:80,courts:8,fac:{l:0,s:0,p:1},plt:'yundong',days:0,diff:'easy',note:'全市最实惠，无灯光，随时可订',q:'full'},
+  {id:8,name:'静安体育中心',district:'静安',addr:'静安区武宁路100号',sports:['tennis','pickleball'],indoor:false,pMin:50,pMax:90,courts:6,fac:{l:1,s:1,p:0},plt:'yundong',days:1,diff:'mid',note:'含匹克球，无停车',q:'full'},
+  {id:9,name:'普陀区全民健身中心',district:'普陀',addr:'普陀区大渡河路1号',sports:['tennis'],indoor:true,pMin:70,pMax:130,courts:4,fac:{l:1,s:1,p:1},plt:'yundong',days:1,diff:'mid',note:'室内场，普陀性价比首选',q:'full'},
+  {id:10,name:'洛克公园（徐汇滨江店）',district:'徐汇',addr:'徐汇区龙腾大道3209号',sports:['tennis','pickleball'],indoor:false,pMin:50,pMax:110,courts:4,fac:{l:1,s:0,p:1},plt:'yundong',days:1,diff:'easy',note:'滨江景观场，网球+匹克球，无淋浴',q:'full'},
+  {id:11,name:'洛克公园（百联西郊店）',district:'长宁',addr:'长宁区仙霞西路88号百联西郊5楼',sports:['pickleball'],indoor:false,pMin:80,pMax:120,courts:4,fac:{l:1,s:0,p:1},plt:'yundong',days:0,diff:'easy',note:'长宁首个匹克球场（2024.10开业），屋顶花园',q:'full'},
+  {id:12,name:'四方体育中心网球馆',district:'普陀',addr:'普陀区长寿路800弄',sports:['tennis'],indoor:true,pMin:80,pMax:150,courts:4,fac:{l:1,s:1,p:0},plt:'yundong',days:1,diff:'mid',note:'居民区内，停车较难',q:'partial'},
+  {id:13,name:'Starbox羽网馆（浦东）',district:'浦东',addr:'浦东新区（地址待核实）',sports:['tennis'],indoor:true,pMin:80,pMax:160,courts:4,fac:{l:1,s:1,p:1},plt:'gogo',days:1,diff:'easy',note:'勾勾运动平台，网球+羽毛球',q:'partial'},
+  {id:14,name:'麦趣网球俱乐部（匹克球场）',district:'徐汇',addr:'徐汇区滨江（地址待核实）',sports:['pickleball'],indoor:false,pMin:80,pMax:150,courts:3,fac:{l:1,s:0,p:0},plt:'gogo',days:0,diff:'easy',note:'勾勾运动平台，徐汇滨江匹克球专区',q:'partial'},
+  {id:15,name:'YONEX帮帮网球学练馆（万体馆店）',district:'徐汇',addr:'徐汇区斜土路2570号1栋1楼',sports:['tennis'],indoor:true,pMin:150,pMax:250,courts:3,fac:{l:1,s:1,p:1},plt:'yonex',days:1,diff:'easy',note:'尤尼克斯官方，智能球机+动捕系统，周一闭馆',q:'full'},
+  {id:16,name:'久博网球（古北）',district:'长宁',addr:'长宁区古北路附近',sports:['tennis'],indoor:true,pMin:120,pMax:200,courts:6,fac:{l:1,s:1,p:1},plt:'jiubo',days:1,diff:'easy',note:'高端室内场',q:'partial'},
+  {id:17,name:'久博网球（旗忠）',district:'闵行',addr:'闵行区旗忠网球中心内',sports:['tennis'],indoor:true,pMin:80,pMax:180,courts:8,fac:{l:1,s:1,p:1},plt:'jiubo',days:1,diff:'easy',note:'久博+旗忠联营',q:'partial'},
+  {id:18,name:'快网·古美中环运动公园店',district:'闵行',addr:'闵行区中环运动公园内',sports:['tennis'],indoor:false,pMin:35,pMax:80,courts:2,fac:{l:1,s:0,p:1},plt:'self',days:0,diff:'easy',note:'快网自助练习馆，发球机，随时可订',q:'partial'},
+  {id:19,name:'快网·金桥花园店',district:'长宁',addr:'长宁区东渚安浜路103号金桥花园',sports:['tennis'],indoor:false,pMin:35,pMax:80,courts:2,fac:{l:1,s:0,p:0},plt:'self',days:0,diff:'easy',note:'快网自助，停车较难',q:'partial'},
+  {id:20,name:'快网·瑞虹新城店',district:'虹口',addr:'虹口区瑞虹新城附近',sports:['tennis'],indoor:false,pMin:35,pMax:80,courts:2,fac:{l:1,s:0,p:0},plt:'self',days:0,diff:'easy',note:'快网自助，地址待核实',q:'partial'},
+  {id:21,name:'光圈HALO·静安昆仑店',district:'静安',addr:'静安区华山路250号昆仑大酒店',sports:['tennis'],indoor:true,pMin:100,pMax:220,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'酒店室内场',q:'partial'},
+  {id:22,name:'光圈HALO·长风大悦城店',district:'普陀',addr:'普陀区大渡河路196号大悦城7楼',sports:['tennis'],indoor:true,pMin:100,pMax:200,courts:4,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'商场顶层',q:'partial'},
+  {id:23,name:'光圈HALO·西班牙名园店',district:'长宁',addr:'长宁区长宁路附近西班牙名园',sports:['tennis'],indoor:true,pMin:100,pMax:200,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:24,name:'光圈HALO·松江新桥店',district:'松江',addr:'松江区新桥附近',sports:['tennis'],indoor:true,pMin:80,pMax:160,courts:4,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:25,name:'越界全景网球场',district:'徐汇',addr:'徐汇区凯旋路2588号锦和越界原力方屋顶',sports:['tennis'],indoor:false,pMin:80,pMax:160,courts:4,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',note:'创意园区屋顶，环境独特',q:'partial'},
+  {id:26,name:'越界全景Padel场',district:'徐汇',addr:'徐汇区凯旋路2588号锦和越界原力方屋顶',sports:['padel'],indoor:false,pMin:120,pMax:240,courts:2,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',note:'上海较早的Padel场之一',q:'partial'},
+  {id:27,name:'江湾国际板式网球中心',district:'杨浦',addr:'杨浦区国和路346号江湾体育场内5号门',sports:['padel'],indoor:true,pMin:120,pMax:280,courts:8,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'6室内+2室外，2025年FIP世界总决赛场地',q:'full'},
+  {id:28,name:'Padel U·律动星学练馆（西郊店）',district:'长宁',addr:'长宁区西郊附近',sports:['padel'],indoor:true,pMin:100,pMax:200,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:29,name:'上海市民体育公园（匹克球）',district:'浦东',addr:'浦东新区E区（地址待核实）',sports:['pickleball'],indoor:false,pMin:10,pMax:100,courts:10,fac:{l:1,s:0,p:1},plt:'self',days:0,diff:'easy',note:'散打10元/时，包场80-100元/时',q:'partial'},
+  {id:30,name:'黄浦滨江匹克球场',district:'黄浦',addr:'黄浦区南外滩滨江（远望1号旁）',sports:['pickleball'],indoor:false,pMin:80,pMax:150,courts:8,fac:{l:1,s:0,p:0},plt:'self',days:0,diff:'easy',note:'2025.4试运营，8片室外，市中心最大户外匹克球地',q:'partial'},
+  {id:31,name:'新虹丘谷园匹克球场',district:'闵行',addr:'闵行区新虹街道丘谷园口袋公园',sports:['pickleball'],indoor:false,pMin:99,pMax:120,courts:4,fac:{l:1,s:0,p:0},plt:'duoduo',days:0,diff:'easy',note:'2025.4.25开业，多多动小程序，提供免费入门课',q:'full'},
+  {id:32,name:'Rally Room·安垦学练馆',district:'长宁',addr:'长宁区平武路80号澳洲之家1楼',sports:['tennis'],indoor:true,pMin:80,pMax:160,courts:3,fac:{l:1,s:1,p:0},plt:'self',days:1,diff:'easy',note:'学练一体，含发球机',q:'partial'},
+  {id:33,name:'好早安网球学练馆（古北）',district:'长宁',addr:'长宁区古北花花世界',sports:['tennis'],indoor:true,pMin:90,pMax:180,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:34,name:'外滩网球·外滩九里学练中心',district:'黄浦',addr:'黄浦区外滩九里附近',sports:['tennis'],indoor:true,pMin:120,pMax:250,courts:3,fac:{l:1,s:1,p:0},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:35,name:'HGA网球俱乐部（招商花园城）',district:'浦东',addr:'浦东新区招商花园城附近',sports:['tennis'],indoor:true,pMin:80,pMax:180,courts:4,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'HGA连锁',q:'partial'},
+  {id:36,name:'上海金仙网球中心（五角场万达）',district:'杨浦',addr:'杨浦区五角场万达广场附近',sports:['tennis'],indoor:true,pMin:80,pMax:160,courts:6,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:37,name:'WoW Tennis',district:'浦东',addr:'浦东新区（地址待核实）',sports:['tennis'],indoor:true,pMin:100,pMax:200,courts:4,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:38,name:'彭白网球文化公园',district:'闵行',addr:'闵行区（地址待核实）',sports:['tennis'],indoor:false,pMin:50,pMax:120,courts:6,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',q:'partial'},
+  {id:39,name:'Best U网球中心（花园饭店）',district:'黄浦',addr:'黄浦区茂名南路58号花园饭店内',sports:['tennis'],indoor:true,pMin:150,pMax:300,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'酒店场，公众号预约',q:'partial'},
+  {id:40,name:'网球有约·上海体育学院',district:'徐汇',addr:'徐汇区中山西路650号',sports:['tennis'],indoor:false,pMin:40,pMax:80,courts:10,fac:{l:1,s:0,p:0},plt:'tennis',days:1,diff:'mid',note:'高校场，价格实惠',q:'partial'},
+];
+
+const GAPS=[
+  '勾勾运动(GoGoSports)：场馆列表需在App内确认，已收录2条代表场馆待核实',
+  '帮帮体育/YONEX Tennis Lab：目前仅录入万体馆店，静安昆仑等其他门店待确认',
+  '快网3家：古美/金桥/瑞虹地址及价格待实地核实',
+  '光圈HALO各店地址待核实（现有4店）',
+  '所有平台AppID均未填入，需抓包或官方渠道获取',
+  '黄浦滨江匹克球场、市民体育公园具体地址及预约渠道待确认',
+  '腾讯地图POI比对：约60+个POI，当前收录40条，剩余20+条待核实后补录',
+];
+
+// ════════════════════════
+//  埋点系统（写入 localStorage）
+// ════════════════════════
+const SID=Math.random().toString(36).slice(2,10);
+const UA_SHORT=(()=>{
+  const ua=navigator.userAgent;
+  if(/MicroMessenger/i.test(ua))return'wechat';
+  if(/iPhone|iPad/i.test(ua))return'ios';
+  if(/Android/i.test(ua))return'android';
+  return'pc';
+})();
+
+function track(type,data={}){
+  try{
+    const key='huqiu_events';
+    const list=JSON.parse(localStorage.getItem(key)||'[]');
+    list.push({id:Date.now()+Math.random().toString(36).slice(2,5),
+      type,ts:Date.now(),sid:SID,ua:UA_SHORT,...data});
+    if(list.length>3000)list.splice(0,list.length-3000);
+    localStorage.setItem(key,JSON.stringify(list));
+  }catch(e){}
+}
+
+// ════════════════════════
+//  用户数据（收藏 & 标签）
+// ════════════════════════
+function getUD(){return JSON.parse(localStorage.getItem('huqiu_user')||'{"favs":[],"tags":{}}');}
+function saveUD(d){localStorage.setItem('huqiu_user',JSON.stringify(d));}
+function isFav(id){return getUD().favs.includes(id);}
+function toggleFav(id,vname){
+  const d=getUD();
+  const had=d.favs.includes(id);
+  if(had)d.favs=d.favs.filter(x=>x!==id);
+  else d.favs.push(id);
+  saveUD(d);
+  track(had?'fav_remove':'fav_add',{venueId:id,venueName:vname});
+  render();
+  showToast(had?'已取消收藏':'❤️ 已收藏');
+}
+function getVenueTags(id){return(getUD().tags[id]||[]);}
+function saveVenueTags(id,tags){const d=getUD();d.tags[id]=tags;saveUD(d);}
+
+// ════════════════════════
+//  筛选状态
+// ════════════════════════
+const S={sport:'',district:'',env:'',price:'',diff:'',plt:'',fav:false};
+const FILTERS=[
+  {k:'sport',opts:[['','全部'],['tennis','🎾 网球'],['pickleball','🏓 匹克球'],['padel','🏸 板式网球']]},
+  null,
+  {k:'district',opts:[['','全上海'],['浦东','浦东'],['徐汇','徐汇'],['长宁','长宁'],['静安','静安'],['普陀','普陀'],['闵行','闵行'],['黄浦','黄浦'],['杨浦','杨浦'],['虹口','虹口'],['松江','松江']]},
+  null,
+  {k:'env',opts:[['','室内外'],['indoor','🏠 室内'],['outdoor','☀️ 室外']]},
+  null,
+  {k:'price',opts:[['','不限'],['low','¥80以下'],['mid','¥80-150'],['high','¥150+']]},
+  null,
+  {k:'diff',opts:[['','难度'],['easy','随时订'],['mid','提前订'],['hard','难抢']]},
+];
+
+// ════════════════════════
+//  搜索（防抖埋点）
+// ════════════════════════
+let searchTimer;
+function onSearch(q){
+  render();
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
+    if(q.trim())track('search',{query:q.trim()});
+  },800);
+}
+
+// ════════════════════════
+//  筛选 & 排序
+// ════════════════════════
+function getFiltered(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  const favIds=getUD().favs;
+  let r=V.filter(v=>{
+    if(S.fav&&!favIds.includes(v.id))return false;
+    if(q&&!v.name.includes(q)&&!v.addr.toLowerCase().includes(q)
+        &&!v.district.includes(q)&&!(v.note||'').includes(q))return false;
+    if(S.sport&&!v.sports.includes(S.sport))return false;
+    if(S.district&&v.district!==S.district)return false;
+    if(S.env==='indoor'&&!v.indoor)return false;
+    if(S.env==='outdoor'&&v.indoor)return false;
+    if(S.price==='low'&&v.pMin>=80)return false;
+    if(S.price==='mid'&&(v.pMax<80||v.pMin>150))return false;
+    if(S.price==='high'&&v.pMax<=150)return false;
+    if(S.diff&&v.diff!==S.diff)return false;
+    if(S.plt&&v.plt!==S.plt)return false;
+    return true;
+  });
+  const so=document.getElementById('sortSel').value;
+  if(so==='pa')r.sort((a,b)=>a.pMin-b.pMin);
+  else if(so==='pd')r.sort((a,b)=>b.pMax-a.pMax);
+  else if(so==='di'){const o={easy:0,mid:1,hard:2};r.sort((a,b)=>o[a.diff]-o[b.diff]);}
+  return r;
+}
+
+// ════════════════════════
+//  渲染
+// ════════════════════════
+function buildFilters(){
+  let h='';
+  FILTERS.forEach(g=>{
+    if(!g){h+='<div class="fsep"></div>';return;}
+    h+='<div class="fgrp">';
+    g.opts.forEach(([v,l])=>{
+      h+=`<button class="chip${S[g.k]===v?' on':''}" onclick="setF('${g.k}','${v}')">${l}</button>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('filterRow').innerHTML=h;
+}
+
+function setF(k,v){
+  // 埋点 filter 变更
+  if(S[k]!==v)track('filter',{key:k,val:v});
+  S[k]=v;render();
+}
+
+function sportLabel(s){return{tennis:'🎾 网球',pickleball:'🏓 匹克球',padel:'🏸 板式网球'}[s]||s;}
+function diffHtml(d){
+  if(d==='easy')return'<span class="diff-easy">✅ 随时可订</span>';
+  if(d==='mid')return'<span class="diff-mid">⏰ 提前1–2天</span>';
+  return'<span class="diff-hard">🔥 难抢</span>';
+}
+
+function card(v){
+  const p=PLT[v.plt];
+  const fav=isFav(v.id);
+  const facs=[{k:'l',l:'💡灯'},{k:'s',l:'🚿淋浴'},{k:'p',l:'🅿️停车'}]
+    .map(f=>`<span class="fac ${v.fac[f.k]?'y':'n'}">${f.l}</span>`).join('');
+  const qb=v.q==='full'
+    ?'<span class="qbadge qfull">✔</span>'
+    :'<span class="qbadge qpart">⚠</span>';
+  const utags=getVenueTags(v.id);
+  const utagsHtml=utags.length
+    ?utags.map(t=>`<span class="utag">${t}<button class="utag-del" onclick="removeTag(${v.id},'${t}',event)">×</button></span>`).join('')
+    :'';
+  return`<div class="vcard" data-id="${v.id}">
+    <div class="cb">
+      <div class="ctop">
+        <div class="ctop-left">
+          <div class="vname">${v.name}${qb}</div>
+          <div class="vloc">📍 ${v.district} · ${v.addr}</div>
+        </div>
+        <div class="ctop-right">
+          <span class="badge ${p.cls}">${p.name}</span>
+          <button class="fav-btn${fav?' active':''}" onclick="toggleFav(${v.id},'${v.name.replace(/'/g,'')}')" title="收藏">
+            ${fav?'❤️':'🤍'}
+          </button>
+        </div>
+      </div>
+      <div class="ctags">
+        ${v.sports.map(s=>`<span class="tag">${sportLabel(s)}</span>`).join('')}
+        <span class="tag">${v.indoor?'🏠 室内':'☀️ 室外'}</span>
+        <span class="tag">🎾 ${v.courts}片</span>
+      </div>
+      <div class="user-tags">
+        ${utagsHtml}
+        <button class="add-tag-btn" onclick="openTagModal(${v.id},'${v.name.replace(/'/g,'')}')">＋ 标签</button>
+      </div>
+      <div class="cfac">${facs}</div>
+      <div class="cfoot">
+        <div>
+          <div class="cprice">¥${v.pMin}–${v.pMax}<span>/小时</span></div>
+          <div style="margin-top:3px">${diffHtml(v.diff)}</div>
+        </div>
+        <button class="book-btn" onclick="openBooking(${v.id})">预约 →</button>
+      </div>
+    </div>
+    ${v.note?`<div class="cnote">💬 ${v.note}</div>`:''}
+  </div>`;
+}
+
+let gapOpen=false;
+function render(){
+  const filtered=getFiltered();
+  const partial=V.filter(x=>x.q==='partial').length;
+  const favCount=getUD().favs.length;
+  document.getElementById('statsBar').textContent=
+    `${V.length}个场馆 · ${Object.keys(PLT).length}个平台${favCount>0?' · ❤️'+favCount+'个收藏':''}`;
+  document.getElementById('resCount').textContent=`筛选结果：${filtered.length} 个场馆`;
+  // gap
+  const gapItems=GAPS.map(g=>`<span style="display:block">· ${g}</span>`).join('');
+  document.getElementById('gapDiv').innerHTML=`
+    <div class="gap-box">
+      <strong>📋 数据缺口（${GAPS.length}项）</strong>
+      <div id="gapItems" style="${gapOpen?'':'display:none'}">${gapItems}</div>
+      <button class="gap-toggle" onclick="gapOpen=!gapOpen;render()">${gapOpen?'▲ 收起':'▼ 展开'}</button>
+    </div>`;
+  document.getElementById('vgrid').innerHTML=filtered.length
+    ?filtered.map(card).join('')
+    :`<div class="empty"><div class="empty-ico">🎾</div><div>没有符合条件的场馆</div></div>`;
+  buildFilters();
+  // 更新收藏底部按钮状态
+  const fbn=document.getElementById('favNavBtn');
+  if(fbn)fbn.classList.toggle('active',S.fav);
+}
+
+// ════════════════════════
+//  收藏筛选（底部导航）
+// ════════════════════════
+function toggleFavFilter(btn){
+  S.fav=!S.fav;
+  track('filter',{key:'fav',val:S.fav});
+  render();
+}
+
+// ════════════════════════
+//  标签弹窗
+// ════════════════════════
+const PRESET_TAGS=['常去❤️','想去🎯','已试过✓','教练推荐👍','性价比高💰','停车方便🅿️','人少好约✨','环境好🌿','灯光好💡','球场新🆕'];
+let tagVenueId=null,tagVenueName='';
+
+function openTagModal(id,name){
+  tagVenueId=id;tagVenueName=name;
+  document.getElementById('tagPanelTitle').textContent=`「${name}」的标签`;
+  renderTagPresets();
+  document.getElementById('tagCustomInput').value='';
+  document.getElementById('tagModal').classList.add('open');
+  track('tag_modal_open',{venueId:id,venueName:name});
+}
+
+function renderTagPresets(){
+  const cur=getVenueTags(tagVenueId);
+  document.getElementById('tagPresets').innerHTML=PRESET_TAGS.map(t=>`
+    <button class="tp${cur.includes(t)?' on':''}" onclick="togglePresetTag('${t}')">${t}</button>
+  `).join('');
+}
+
+function togglePresetTag(tag){
+  const tags=getVenueTags(tagVenueId);
+  const had=tags.includes(tag);
+  const newTags=had?tags.filter(x=>x!==tag):[...tags,tag];
+  saveVenueTags(tagVenueId,newTags);
+  track(had?'tag_remove':'tag_add',{venueId:tagVenueId,venueName:tagVenueName,tag});
+  renderTagPresets();
+  render();
+}
+
+function addCustomTag(){
+  const inp=document.getElementById('tagCustomInput');
+  const t=inp.value.trim();
+  if(!t)return;
+  if(t.length>10){showToast('标签最多10个字');return;}
+  const tags=getVenueTags(tagVenueId);
+  if(tags.includes(t)){showToast('该标签已存在');return;}
+  if(tags.length>=8){showToast('最多8个标签');return;}
+  saveVenueTags(tagVenueId,[...tags,t]);
+  track('tag_add',{venueId:tagVenueId,venueName:tagVenueName,tag:t,custom:true});
+  inp.value='';
+  renderTagPresets();
+  render();
+}
+
+function removeTag(id,tag,e){
+  e.stopPropagation();
+  const tags=getVenueTags(id).filter(x=>x!==tag);
+  saveVenueTags(id,tags);
+  track('tag_remove',{venueId:id,tag});
+  render();
+}
+
+function closeTagModal(e){
+  if(e&&e.target!==document.getElementById('tagModal'))return;
+  document.getElementById('tagModal').classList.remove('open');
+  tagVenueId=null;
+}
+
+// ════════════════════════
+//  预约弹窗
+// ════════════════════════
+let curVenue=null;
+const isWechat=/MicroMessenger/i.test(navigator.userAgent);
+
+function openBooking(id){
+  curVenue=V.find(x=>x.id===id);
+  const p=PLT[curVenue.plt];
+  track('booking_open',{venueId:id,venueName:curVenue.name,platform:curVenue.plt});
+  document.getElementById('mTitle').textContent='去预约 →';
+  document.getElementById('mSub').textContent=`通过「${p.name}」预约`;
+  document.getElementById('mName').textContent=curVenue.name;
+  document.getElementById('mAddr').textContent='📍 '+curVenue.district+' · '+curVenue.addr;
+  let actions='';
+  if(curVenue.plt==='wechat'){
+    actions+=aHtml('m-primary','💬','加群预约','加入对应微信群后群内抢位',"doAction('group')");
+  } else if(p.appId){
+    actions+=aHtml('m-primary','🚀',`打开「${p.mp}」`,
+      isWechat?'点击跳转（微信内）':'将在微信中打开',"doAction('jump')");
+  } else {
+    actions+=aHtml('m-primary','🔍',`微信搜索「${p.mp||p.name}」`,
+      '复制名称后在微信搜索',"doAction('search')");
+  }
+  actions+=aHtml('','🗺','打开地图导航','腾讯地图导航到场馆',"doAction('map')");
+  actions+=aHtml('','📋','复制场馆地址','复制后发给球友',"doAction('copy')");
+  document.getElementById('mActions').innerHTML=actions;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function aHtml(cls,ico,label,desc,fn){
+  return`<button class="m-action ${cls}" onclick="${fn}">
+    <span class="m-action-ico">${ico}</span>
+    <div><div class="m-action-label">${label}</div><div class="m-action-desc">${desc}</div></div>
+  </button>`;
+}
+
+function doAction(type){
+  if(!curVenue)return;
+  const p=PLT[curVenue.plt];
+  track('booking_action',{venueId:curVenue.id,venueName:curVenue.name,action:type});
+  if(type==='jump'){
+    if(isWechat&&typeof wx!=='undefined'&&wx.miniProgram){
+      wx.miniProgram.navigateToMiniProgram({appId:p.appId,path:p.path||'',envVersion:'release'});
+    } else if(p.appId){
+      window.location.href=`weixin://dl/business/?appid=${p.appId}`;
+    }
+  } else if(type==='search'){
+    copyText(p.mp||p.name);
+    showToast(`已复制「${p.mp||p.name}」，在微信搜索栏粘贴`);
+  } else if(type==='map'){
+    const q=encodeURIComponent(curVenue.name+' '+curVenue.addr);
+    window.open(`https://apis.map.qq.com/uri/v1/search?keyword=${q}&region=上海`,'_blank');
+  } else if(type==='copy'){
+    copyText(curVenue.name+' '+curVenue.addr);
+    showToast('地址已复制');
+  } else if(type==='group'){
+    showToast('请联系场馆客服获取群二维码');
+  }
+  if(type!=='jump')closeModal();
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modalBg'))return;
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+// ════════════════════════
+//  分享
+// ════════════════════════
+function shareApp(){
+  track('share_tap',{});
+  if(isWechat){
+    showToast('点击右上角"···"分享给朋友或朋友圈');
+  } else {
+    copyText(location.href);
+    showToast('链接已复制，可发送给球友');
+  }
+}
+
+// ════════════════════════
+//  底部导航
+// ════════════════════════
+function setNav(tab,btn){
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='map')showToast('地图视图开发中 🗺');
+}
+
+function openFeedback(){
+  const s=prompt('场馆名称 + 需要补充或纠正的信息：');
+  if(s){
+    track('feedback',{content:s.slice(0,200)});
+    showToast('感谢反馈！将尽快核实更新');
+  }
+}
+
+// ════════════════════════
+//  工具
+// ════════════════════════
+function copyText(t){
+  try{navigator.clipboard.writeText(t);}
+  catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);}
+}
+
+let toastTimer;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+function adjustFilterTop(){
+  const h=document.getElementById('mainHeader').offsetHeight;
+  document.getElementById('filterWrap').style.top=h+'px';
+}
+
+// ════════════════════════
+//  初始化
+// ════════════════════════
+track('session_start',{venueCount:V.length,url:location.href.slice(0,100)});
+render();
+adjustFilterTop();
+window.addEventListener('resize',adjustFilterTop);
+</script>
+</body>
+</html>
