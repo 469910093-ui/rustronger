@@ -101,6 +101,7 @@ header{
 .p-tennis  {background:#FEF9EE;color:#B45309}
 .p-duoduo  {background:#FFF1F2;color:#BE123C}
 .p-yonex   {background:#F0F4FF;color:#4338CA}
+.p-padelu  {background:#FFF0FB;color:#9B1D75}
 .p-self    {background:#F4F4F5;color:#52525B}
 .p-wechat  {background:#F0FDF4;color:#166534}
 /* 收藏按钮 */
@@ -334,6 +335,7 @@ const PLT={
   tennis:   {name:'网球有约',  cls:'p-tennis',   mp:'网球有约',            appId:'',path:''},
   duoduo:   {name:'多多动',    cls:'p-duoduo',   mp:'多多动OurPickleball', appId:'',path:''},
   yonex:    {name:'帮帮体育',  cls:'p-yonex',    mp:'YONEX Tennis Lab',   appId:'',path:''},
+  padelu:   {name:'PadelU',   cls:'p-padelu',   mp:'PadelU板式网球',       appId:'',path:''},
   self:     {name:'自营',      cls:'p-self',     mp:'',                    appId:'',path:''},
   wechat:   {name:'微信群',    cls:'p-wechat',   mp:'',                    appId:'',path:''},
 };
@@ -369,7 +371,7 @@ const V=[
   {id:25,name:'越界全景网球场',district:'徐汇',addr:'徐汇区凯旋路2588号锦和越界原力方屋顶',sports:['tennis'],indoor:false,pMin:80,pMax:160,courts:4,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',note:'创意园区屋顶，环境独特',q:'partial'},
   {id:26,name:'越界全景Padel场',district:'徐汇',addr:'徐汇区凯旋路2588号锦和越界原力方屋顶',sports:['padel'],indoor:false,pMin:120,pMax:240,courts:2,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',note:'上海较早的Padel场之一',q:'partial'},
   {id:27,name:'江湾国际板式网球中心',district:'杨浦',addr:'杨浦区国和路346号江湾体育场内5号门',sports:['padel'],indoor:true,pMin:120,pMax:280,courts:8,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'6室内+2室外，2025年FIP世界总决赛场地',q:'full'},
-  {id:28,name:'Padel U·律动星学练馆（西郊店）',district:'长宁',addr:'长宁区西郊附近',sports:['padel'],indoor:true,pMin:100,pMax:200,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',q:'partial'},
+  {id:28,name:'Padel U·律动星学练馆（西郊店）',district:'长宁',addr:'长宁区协和路1501弄西郊悦荟',sports:['padel'],indoor:true,pMin:100,pMax:200,courts:3,fac:{l:1,s:1,p:1},plt:'padelu',days:1,diff:'easy',q:'partial'},
   {id:29,name:'上海市民体育公园（匹克球）',district:'浦东',addr:'浦东新区E区（地址待核实）',sports:['pickleball'],indoor:false,pMin:10,pMax:100,courts:10,fac:{l:1,s:0,p:1},plt:'self',days:0,diff:'easy',note:'散打10元/时，包场80-100元/时',q:'partial'},
   {id:30,name:'黄浦滨江匹克球场',district:'黄浦',addr:'黄浦区南外滩滨江（远望1号旁）',sports:['pickleball'],indoor:false,pMin:80,pMax:150,courts:8,fac:{l:1,s:0,p:0},plt:'self',days:0,diff:'easy',note:'2025.4试运营，8片室外，市中心最大户外匹克球地',q:'partial'},
   {id:31,name:'新虹丘谷园匹克球场',district:'闵行',addr:'闵行区新虹街道丘谷园口袋公园',sports:['pickleball'],indoor:false,pMin:99,pMax:120,courts:4,fac:{l:1,s:0,p:0},plt:'duoduo',days:0,diff:'easy',note:'2025.4.25开业，多多动小程序，提供免费入门课',q:'full'},
@@ -382,6 +384,11 @@ const V=[
   {id:38,name:'彭白网球文化公园',district:'闵行',addr:'闵行区（地址待核实）',sports:['tennis'],indoor:false,pMin:50,pMax:120,courts:6,fac:{l:1,s:0,p:1},plt:'self',days:1,diff:'mid',q:'partial'},
   {id:39,name:'Best U网球中心（花园饭店）',district:'黄浦',addr:'黄浦区茂名南路58号花园饭店内',sports:['tennis'],indoor:true,pMin:150,pMax:300,courts:3,fac:{l:1,s:1,p:1},plt:'self',days:1,diff:'easy',note:'酒店场，公众号预约',q:'partial'},
   {id:40,name:'网球有约·上海体育学院',district:'徐汇',addr:'徐汇区中山西路650号',sports:['tennis'],indoor:false,pMin:40,pMax:80,courts:10,fac:{l:1,s:0,p:0},plt:'tennis',days:1,diff:'mid',note:'高校场，价格实惠',q:'partial'},
+  {id:41,name:'PadelU·黄浦博荟广场店',district:'黄浦',addr:'黄浦区中山南一路788号博荟广场ONE EAST',sports:['padel'],indoor:false,pMin:320,pMax:400,courts:2,fac:{l:1,s:1,p:0},plt:'padelu',days:1,diff:'mid',note:'户外场，外滩边上，¥400/h，地铁9号线马当路站',q:'partial'},
+  {id:42,name:'PadelU Social Box·大宁久光店',district:'静安',addr:'静安区大宁久光中心',sports:['padel'],indoor:true,pMin:200,pMax:280,courts:2,fac:{l:1,s:1,p:1},plt:'padelu',days:1,diff:'easy',note:'2025年4月开业，商场内室内场',q:'partial'},
+  {id:43,name:'PadelU·凯德星贸店',district:'静安',addr:'静安区凯德星贸广场',sports:['padel'],indoor:true,pMin:200,pMax:240,courts:2,fac:{l:1,s:1,p:1},plt:'padelu',days:1,diff:'easy',note:'平日¥200/h，周末¥240/h',q:'partial'},
+  {id:44,name:'PadelU·MOHO Mall店',district:'静安',addr:'静安区MOHO Mall',sports:['padel'],indoor:true,pMin:180,pMax:260,courts:2,fac:{l:1,s:1,p:1},plt:'padelu',days:1,diff:'easy',q:'partial'},
+  {id:45,name:'PadelU·漕河泾屋顶店（PadelUP）',district:'徐汇',addr:'徐汇区漕河泾路250号银海大楼11楼屋顶',sports:['padel'],indoor:false,pMin:180,pMax:300,courts:2,fac:{l:1,s:0,p:1},plt:'padelu',days:1,diff:'mid',note:'屋顶露天场，¥180–300/h，停车方便',q:'partial'},
 ];
 
 const GAPS=[
@@ -441,7 +448,7 @@ function saveVenueTags(id,tags){const d=getUD();d.tags[id]=tags;saveUD(d);}
 // ════════════════════════
 const S={sport:'',district:'',env:'',price:'',diff:'',plt:'',fav:false};
 const FILTERS=[
-  {k:'sport',opts:[['','全部'],['tennis','🎾 网球'],['pickleball','🏓 匹克球'],['padel','🏸 板式网球']]},
+  {k:'sport',opts:[['','全部'],['tennis','🎾 网球'],['pickleball','◎ 匹克球'],['padel','▬● 板式网球']]},
   null,
   {k:'district',opts:[['','全上海'],['浦东','浦东'],['徐汇','徐汇'],['长宁','长宁'],['静安','静安'],['普陀','普陀'],['闵行','闵行'],['黄浦','黄浦'],['杨浦','杨浦'],['虹口','虹口'],['松江','松江']]},
   null,
@@ -514,7 +521,14 @@ function setF(k,v){
   S[k]=v;render();
 }
 
-function sportLabel(s){return{tennis:'🎾 网球',pickleball:'🏓 匹克球',padel:'🏸 板式网球'}[s]||s;}
+function sportLabel(s){
+  const m={
+    tennis:'🎾 网球',
+    pickleball:'<span style="display:inline-flex;align-items:center;gap:2px"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5.5" fill="#C8E63C" stroke="#7A9A00" stroke-width="1"/><circle cx="4" cy="4.5" r="1" fill="white" opacity=".7"/><circle cx="7" cy="4.5" r="1" fill="white" opacity=".7"/><circle cx="10" cy="4.5" r="1" fill="white" opacity=".7"/><circle cx="4" cy="7.5" r="1" fill="white" opacity=".7"/><circle cx="7" cy="7.5" r="1" fill="white" opacity=".7"/><circle cx="10" cy="7.5" r="1" fill="white" opacity=".7"/><circle cx="4" cy="10.5" r="1" fill="white" opacity=".7"/><circle cx="7" cy="10.5" r="1" fill="white" opacity=".7"/><circle cx="10" cy="10.5" r="1" fill="white" opacity=".7"/></svg> 匹克球</span>',
+    padel:'<span style="display:inline-flex;align-items:center;gap:2px"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="1" width="7" height="8" rx="2" fill="#E87820" stroke="#B35500" stroke-width=".8"/><rect x="3.5" y="2.5" width="4" height="5" rx="1" fill="none" stroke="white" stroke-width=".7" opacity=".8"/><rect x="3" y="9" width="1.2" height="3" rx=".5" fill="#8B5E3C"/><rect x="7" y="9" width="1.2" height="3" rx=".5" fill="#8B5E3C"/><circle cx="10.5" cy="3.5" r="1.8" fill="#FFE44D" stroke="#BBA000" stroke-width=".6"/></svg> 板式网球</span>'
+  };
+  return m[s]||s;
+}
 function diffHtml(d){
   if(d==='easy')return'<span class="diff-easy">✅ 随时可订</span>';
   if(d==='mid')return'<span class="diff-mid">⏰ 提前1–2天</span>';
@@ -712,8 +726,9 @@ function doAction(type){
       window.location.href=`weixin://dl/business/?appid=${p.appId}`;
     }
   } else if(type==='search'){
-    copyText(p.mp||p.name);
-    showToast(`已复制「${p.mp||p.name}」，在微信搜索栏粘贴`);
+    const copyTarget=p.mp||(curVenue.plt==='self'?curVenue.name:p.name);
+    copyText(copyTarget);
+    showToast(`已复制「${copyTarget}」，在微信搜索栏粘贴`);
   } else if(type==='map'){
     const q=encodeURIComponent(curVenue.name+' '+curVenue.addr);
     window.open(`https://apis.map.qq.com/uri/v1/search?keyword=${q}&region=上海`,'_blank');
